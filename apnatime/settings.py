@@ -155,6 +155,8 @@ REST_AUTH_SERIALIZERS = {
     'TOKEN_SERIALIZER': 'user_auth.serializers.CustomTokenSerializer'
 }
 
+ALLOWED_HOSTS = ['*']
+
 
 def gettext(s):
     return s
