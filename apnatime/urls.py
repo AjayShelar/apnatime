@@ -18,7 +18,7 @@ from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 from django.conf.urls import url, include
-from user_auth.views import RegisterView, LoginViewCustom, UserView
+from user_auth.views import RegisterView, LoginViewCustom, UserView, PhotoUploadView
 
 urlpatterns = [
     url(r'^', include(router.urls)),
@@ -29,6 +29,8 @@ urlpatterns = [
 
     url(r'^rest-auth/login/', LoginViewCustom.as_view(), name='rest_login'),
     url(r'^api/v1/user/((?P<pk>[0-9]+)/)?$', UserView.as_view()),
+    url(r'^api/v1/user/photo/$',
+        PhotoUploadView.as_view()),
 
 
 

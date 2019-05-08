@@ -144,7 +144,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 AUTH_USER_MODEL = 'user_auth.User'
 AUTHENTICATION_BACKENDS = [
-    'user_auth.auth_backends.Backend',
+    'user_auth.auth_backends.UsernameBackend',
+    'user_auth.auth_backends.PhoneNumberBackend',
 
     'django.contrib.auth.backends.ModelBackend',
 

@@ -17,6 +17,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserDataSerializer(serializers.ModelSerializer):
+    """
+    Creating, updating, deleting and retrieving user.
+    For eeach post and put request phone_number is required.
+    """
     phone_number = PhoneNumberField(required=True)
 
     photo = serializers.ReadOnlyField()
@@ -52,7 +56,20 @@ class UserDataSerializer(serializers.ModelSerializer):
         user.save()
         profile, created = UserProfile.objects.get_or_create(user=user)
         if 'profile' in validated_data:
-            profile.language = validated_data['profile']['language']
+            try:
+                profile.language = validated_data['profile']['language']
+            except KeyError:
+                pass
+
+            try:
+                profile.birthdate = validated_data['profile']['birthdate']
+            except KeyError:
+                pass
+
+            try:
+                profile.address = validated_data['profile']['address']
+            except KeyError:
+                pass
 
         profile.save()
 
@@ -61,27 +78,57 @@ class UserDataSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        instance.first_name = validated_data['first_name']
-        instance.last_name = validated_data['last_name']
+        if 'first_name' in validated_data:
+            instance.first_name = validated_data['first_name']
+        if 'last_name' in validated_data:
+            instance.last_name = validated_data['last_name']
         instance.clean()
         instance.save()
 
         # Create profile
         profile, created = UserProfile.objects.get_or_create(user=instance)
         if 'profile' in validated_data:
-            profile.language = validated_data['profile']['language']
+            try:
+                profile.language = validated_data['profile']['language']
+            except KeyError:
+                pass
+
+            try:
+                profile.birthdate = validated_data['profile']['birthdate']
+            except KeyError:
+                pass
+
+            try:
+                profile.address = validated_data['profile']['address']
+            except KeyError:
+                pass
+
+            try:
+                profile.years_of_experience = validated_data['profile']['years_of_experience']
+            except KeyError:
+                pass
+        profile.clean()
+
         profile.save()
 
         return instance
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    After registration reponse includes,
+    'phone_number', 'first_name', 'last_name', 'password'
+    """
     class Meta:
         model = User
         fields = ('phone_number', 'first_name', 'last_name', 'password')
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer for users creating profile during initial registeration.
+
+    """
     user = UserSerializer()
 
     class Meta(object):
@@ -101,6 +148,11 @@ from django.core import exceptions
 
 
 class LoginSerializer(serializers.Serializer):
+
+    """
+    Serializer for credentials authentication.
+    Using django's authenticate to validate user.
+    """
     phone_number = serializers.CharField(required=False, allow_blank=True)
     username = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(style={'input_type': 'password'})
@@ -115,7 +167,7 @@ class LoginSerializer(serializers.Serializer):
 
         user = authenticate(
             username=username, password=password, phone_number=phone_number)
-        print(user)
+
         if user:
             if not user.is_active:
                 msg = 'User account is disabled.'
@@ -144,3 +196,16 @@ class CustomTokenSerializer(TokenSerializer):
     class Meta(object):
         model = TokenModel
         fields = ['key', 'user']
+
+
+class PhotoUploadSerializer(serializers.Serializer):
+    photo = serializers.ImageField()
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    def create(self, validated_data):
+        profile, c = UserProfile.objects.get_or_create(
+            user=validated_data['user'])
+
+        profile.photo = validated_data['photo']
+        profile.save()
+        return profile

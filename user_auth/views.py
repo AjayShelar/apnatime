@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, GenericAPIView, UpdateAPIView, \
-    RetrieveUpdateAPIView
+    RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from user_auth.models import *
@@ -80,7 +80,7 @@ class UserFilter(filters.FilterSet):
 from rest_framework.response import Response
 
 
-class UserView(RetrieveAPIView, CreateAPIView, UpdateAPIView, ListAPIView):
+class UserView(CreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView):
     permission_classes = (IsAdminUserOrReadAndWrite, )
 
     queryset = User.objects.all()
@@ -115,3 +115,17 @@ class UserView(RetrieveAPIView, CreateAPIView, UpdateAPIView, ListAPIView):
             return Response(serializer.data)
         else:
             return self.retrieve(request, *args, **kwargs)
+
+
+from rest_framework.parsers import MultiPartParser, FormParser
+
+
+class PhotoUploadView(CreateAPIView):
+    permission_classes = (IsAdminUserOrReadAndWrite, )
+
+    queryset = UserProfile.objects.all()
+    serializer_class = PhotoUploadSerializer
+    parser_classes = (
+        MultiPartParser,
+        FormParser,
+    )

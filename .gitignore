@@ -1,4 +1,3 @@
-.idea/*
 celerybeat-schedule.db
 celerybeat.pid
 *.pyc
@@ -10,5 +9,3 @@ env/*
 .vscode
 sqlite3.db
 *.db
-LeanAgri/django.log
-LeanAgri/django.log
