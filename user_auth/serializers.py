@@ -16,6 +16,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
                   'years_of_experience', 'address')
 
 
+from django.core import exceptions
+
+
 class UserDataSerializer(serializers.ModelSerializer):
     """
     Creating, updating, deleting and retrieving user.
@@ -38,19 +41,14 @@ class UserDataSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        # print("----------in")
-        if validated_data.get('type', None):
+        if validated_data.get('phone_number', None):
             user = User(
                 phone_number=validated_data['phone_number'],
                 first_name=validated_data['first_name'],
                 last_name=validated_data['last_name'],
             )
         else:
-            user = User(
-                phone_number=validated_data['phone_number'],
-                first_name=validated_data['first_name'],
-                last_name=validated_data['last_name'],
-            )
+            raise exceptions.ValidationError('phone_number is required')
 
         user.clean()
         user.save()
@@ -117,8 +115,11 @@ class UserDataSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """
     After registration reponse includes,
-    'phone_number', 'first_name', 'last_name', 'password'
+    'phone_number', 'first_name', 'last_name', 
     """
+    password = serializers.CharField(
+        style={'input_type': 'password'}, write_only=True)
+
     class Meta:
         model = User
         fields = ('phone_number', 'first_name', 'last_name', 'password')
@@ -136,8 +137,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ('language', 'user', 'birthdate', 'address')
 
     def create(self, validated_data):
+        password = None
+        if 'password' in validated_data['user']:
+            password = validated_data['user']['password']
         user_data = validated_data.pop('user')
         user = User.create_user(**user_data)
+        if password:
+            user.set_password(password)
 
         profile = UserProfile.objects.create(user=user, **validated_data)
         return profile
