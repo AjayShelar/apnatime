@@ -17,8 +17,9 @@ class User(AbstractUser):
     phone_number = PhoneNumberField(unique=True)
     is_active = models.BooleanField(default=False)
     created_by = models.ForeignKey(
-        'User', blank=True, null=True, related_name='created_users')
-    edited_by = models.ForeignKey('User', blank=True, null=True)
+        'User', blank=True, null=True, related_name='created_users', on_delete=models.CASCADE)
+    edited_by = models.ForeignKey(
+        'User', blank=True, null=True,  on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     edited = models.DateTimeField(auto_now=True)
 
